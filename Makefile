@@ -30,3 +30,7 @@ doctor:
 	@echo "📄 Daemon Config:"
 	@cat /etc/docker/daemon.json 2>/dev/null || echo "⚠️ No daemon.json found"
 	@echo "✅ Diagnostics complete."
+
+
+update:
+	@git pull origin main || echo "⚠️ Failed to pull. Are you in a git repo?"
