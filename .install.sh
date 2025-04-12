@@ -18,7 +18,6 @@ echo "🚀 Running bootstrap..."
 chmod +x bootstrap.sh
 ./bootstrap.sh
 
-
 # --- Docker Daemon Check ---
 echo "🐳 Checking Docker setup..."
 if ! docker info &>/dev/null; then
@@ -28,3 +27,19 @@ if ! docker info &>/dev/null; then
 else
   echo "✅ Docker daemon is accessible."
 fi
+
+# --- Detect Distro ---
+echo "🔎 Detecting distribution..."
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  echo "✅ Detected: $NAME $VERSION"
+elif command -v lsb_release &> /dev/null; then
+  lsb_release -a
+else
+  echo "⚠️ Unable to determine OS distribution."
+fi
+
+# --- Run test_env.sh ---
+echo "🧪 Running environment validation..."
+chmod +x ./test_env.sh
+./test_env.sh
