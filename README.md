@@ -53,3 +53,6 @@ make install   # Run bootstrap
 make test      # Run test_env.sh
 make clean     # Remove installed test_env.sh
 ```
+
+make fix-docker  # Attempt to fix Docker daemon if inaccessible
+make doctor      # Full diagnostic: Docker, distro, user groups, and daemon.json
