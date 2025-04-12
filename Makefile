@@ -14,3 +14,6 @@ clean:
 	@echo "🧹 Cleaned up test_env.sh"
 
 all: install test
+
+fix-docker:
+	@./fix_docker.sh

@@ -17,3 +17,14 @@ fi
 echo "🚀 Running bootstrap..."
 chmod +x bootstrap.sh
 ./bootstrap.sh
+
+
+# --- Docker Daemon Check ---
+echo "🐳 Checking Docker setup..."
+if ! docker info &>/dev/null; then
+  echo "⚠️ Docker daemon not accessible. Running fix_docker.sh..."
+  chmod +x ./fix_docker.sh
+  ./fix_docker.sh
+else
+  echo "✅ Docker daemon is accessible."
+fi
