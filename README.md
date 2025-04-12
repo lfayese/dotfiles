@@ -2,19 +2,35 @@
 
 This bundle includes everything to bootstrap a developer environment with GPG, SSH, Docker, and GitLab config.
 
-## 🔧 Setup Instructions
+---
+
+## 🚀 Quick Setup (Recommended)
 
 ```bash
-chmod +x bootstrap.sh
-./bootstrap.sh
+chmod +x .install.sh
+./.install.sh
 ```
+
+This script will:
+- Clone the dotfiles repo into `~/.dotfiles`
+- Pull updates if already cloned
+- Run the full `bootstrap.sh` setup
+
+---
 
 ## 🧪 Test Your Environment
 
 ```bash
-chmod +x test_env.sh
 ./test_env.sh
 ```
+
+Checks:
+- GPG key is installed
+- Docker CLI is available
+- Docker daemon is running
+- Runs a test container
+
+---
 
 ## 📂 Included
 
@@ -22,7 +38,18 @@ chmod +x test_env.sh
 - `.gitconfig.append` – Git user and GPG signing
 - `.ssh/config` – SSH setup
 - `.gnupg/gpg.conf` – GPG agent config
-- `setup_docker.sh`, `bootstrap.sh` – Docker + WSL
-- `.wslconfig`, `.docker/config.json` – Docker & WSL integration
-- `test_env.sh` – automated environment tests
+- `setup_docker.sh`, `bootstrap.sh` – Docker + WSL2
+- `.wslconfig`, `.docker/config.json` – Docker & WSL
+- `test_env.sh` – environment sanity check
+- `.install.sh` – clone + bootstrap from GitHub
+- `Makefile` – for install/test/clean automation
 
+---
+
+## 💻 Developer Notes
+
+```bash
+make install   # Run bootstrap
+make test      # Run test_env.sh
+make clean     # Remove installed test_env.sh
+```
