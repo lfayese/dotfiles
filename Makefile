@@ -17,3 +17,16 @@ all: install test
 
 fix-docker:
 	@./fix_docker.sh
+
+
+doctor:
+	@echo "🩺 Running full dotfiles environment diagnostics..."
+	@chmod +x ./test_env.sh || true
+	@./test_env.sh || true
+	@echo "🧠 Distro Info:"
+	@cat /etc/os-release 2>/dev/null || lsb_release -a || echo "⚠️ Cannot detect distribution"
+	@echo "👤 Docker Group:"
+	@id -nG | grep docker || echo "⚠️ User is NOT in the docker group"
+	@echo "📄 Daemon Config:"
+	@cat /etc/docker/daemon.json 2>/dev/null || echo "⚠️ No daemon.json found"
+	@echo "✅ Diagnostics complete."
