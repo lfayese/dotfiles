@@ -1,5 +1,23 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
+template: |
+  ## Changes
+
+  $CHANGES
+
+  ## Contributors
+
+  $CONTRIBUTORS
+
+version-resolver:
+  major:
+    labels: [breaking]
+  minor:
+    labels: [feature]
+  patch:
+    labels: [fix, chore, docs]
+  default: patch
+
 categories:
   - title: '🚀 Features'
     labels: [feature]
@@ -9,12 +27,6 @@ categories:
     labels: [chore]
   - title: '📘 Documentation'
     labels: [docs]
+
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 no-changes-template: 'No significant changes.'
-version-resolver:
-  major:
-    labels: [breaking]
-  minor:
-    labels: [feature]
-  patch:
-    labels: [fix, chore, docs]
