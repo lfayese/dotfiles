@@ -26,6 +26,27 @@ if [ -d .git ]; then
 fi
 fi
 
+
+# --- Auto-install required packages ---
+echo "📦 Checking and installing required dependencies..."
+DEPS=(git curl gpg docker)
+
+for pkg in "${DEPS[@]}"; do
+  if ! command -v $pkg &>/dev/null; then
+    echo "📥 Installing missing: $pkg"
+    if [ -f /etc/debian_version ]; then
+      sudo apt-get update && sudo apt-get install -y $pkg
+    elif [ -f /etc/redhat-release ]; then
+      sudo yum install -y $pkg
+    elif [ -f /etc/arch-release ]; then
+      sudo pacman -Sy --noconfirm $pkg
+    else
+      echo "⚠️ Please install $pkg manually for your distro."
+    fi
+  else
+    echo "✅ $pkg is already installed"
+  fi
+done
 echo "🚀 Running bootstrap..."
 chmod +x bootstrap.sh
 ./bootstrap.sh

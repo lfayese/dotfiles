@@ -6,6 +6,8 @@ This bundle includes everything to bootstrap a developer environment with GPG, S
 
 ## 🚀 Quick Setup (Recommended)
 
+**Auto-installs:** git, curl, gpg, docker (if missing)
+
 ```bash
 chmod +x .install.sh
 ./.install.sh
