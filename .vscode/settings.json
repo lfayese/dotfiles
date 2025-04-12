@@ -1,0 +1,10 @@
+{
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "files.autoSave": "onFocusChange",
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "git.enableSmartCommit": true,
+    "workbench.startupEditor": "none",
+    "explorer.confirmDelete": false,
+    "extensions.ignoreRecommendations": false
+}

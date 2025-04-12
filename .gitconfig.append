@@ -1,0 +1,8 @@
+[user]
+  name = Laolu Fayese
+  email = 166741136+lfayese@users.noreply.github.com
+  signingkey = 6B9A3B918A0870C2
+[gpg]
+  program = gpg
+[commit]
+  gpgsign = true

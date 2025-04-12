@@ -1,0 +1,12 @@
+### DOTFILES-BOOTSTRAP-START
+
+# WSL + Keychain integration
+export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+if [ ! -S "$SSH_AUTH_SOCK" ]; then
+  eval $(keychain --eval --agents ssh ~/.ssh/id_*)
+fi
+
+# GPG signing setup
+export GPG_TTY=$(tty)
+
+### DOTFILES-BOOTSTRAP-END
