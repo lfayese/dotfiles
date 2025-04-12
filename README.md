@@ -56,3 +56,6 @@ make clean     # Remove installed test_env.sh
 
 make fix-docker  # Attempt to fix Docker daemon if inaccessible
 make doctor      # Full diagnostic: Docker, distro, user groups, and daemon.json
+
+make update     # Pull latest changes from GitHub
+make reset      # Reset local repo to match origin/main

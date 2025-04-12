@@ -34,3 +34,10 @@ doctor:
 
 update:
 	@git pull origin main || echo "⚠️ Failed to pull. Are you in a git repo?"
+
+
+reset:
+	@git fetch origin
+	@git reset --hard origin/main
+	@git clean -fd
+	@echo "🔁 Repository has been reset to match origin/main"

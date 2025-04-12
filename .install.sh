@@ -8,10 +8,22 @@ echo "📦 Cloning dotfiles repo into $CLONE_DIR..."
 if [ -d "$CLONE_DIR" ]; then
   echo "⚠️ $CLONE_DIR already exists. Pulling latest changes..."
   cd "$CLONE_DIR"
+
+# Auto-update if this is a git repo
+if [ -d .git ]; then
+  echo "🔄 Pulling latest updates from GitHub..."
+  make update || echo "⚠️ Could not update from origin"
+fi
   git pull
 else
   git clone "$REPO_URL" "$CLONE_DIR"
   cd "$CLONE_DIR"
+
+# Auto-update if this is a git repo
+if [ -d .git ]; then
+  echo "🔄 Pulling latest updates from GitHub..."
+  make update || echo "⚠️ Could not update from origin"
+fi
 fi
 
 echo "🚀 Running bootstrap..."
