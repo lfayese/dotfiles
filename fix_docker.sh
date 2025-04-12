@@ -1,47 +1,70 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🐳 Docker Daemon Diagnostics & Fix Tool"
+echo "🐳 Docker Daemon Auto-Fix Tool"
 
-# Check if docker is installed
-if ! command -v docker &> /dev/null; then
-  echo "❌ Docker is not installed. Please install Docker Desktop or Engine first."
-  exit 1
-fi
+DAEMON_JSON="/etc/docker/daemon.json"
+BACKUP_JSON="/etc/docker/daemon.json.bak.$(date +%s)"
 
-echo "✅ Docker CLI is installed."
-
-# Check Docker daemon status
-echo "🔍 Checking Docker daemon accessibility..."
-if docker info &> /dev/null; then
-  echo "✅ Docker daemon is running and accessible."
-  exit 0
-fi
-
-echo "⚠️ Docker daemon is not accessible."
-
-# Try systemctl start (for Linux distros using systemd)
-if command -v systemctl &> /dev/null; then
-  echo "⏳ Attempting to start Docker using systemctl..."
-  sudo systemctl start docker
-  sleep 3
-  if docker info &> /dev/null; then
-    echo "✅ Docker started successfully using systemctl."
-    exit 0
+backup_daemon_json() {
+  if [[ -f $DAEMON_JSON ]]; then
+    sudo cp "$DAEMON_JSON" "$BACKUP_JSON"
+    echo "📦 Backup saved to $BACKUP_JSON"
   fi
-fi
+}
 
-# Try restarting Docker Desktop (WSL case)
-if grep -i microsoft /proc/version &> /dev/null; then
-  echo "⚙️ Detected WSL environment. Trying WSL restart..."
-  powershell.exe -Command "wsl --shutdown"
-  echo "🔁 Please manually restart Docker Desktop from Windows UI."
-  exit 1
-fi
+merge_json_config() {
+  local new_config="$1"
+  tmp_file=$(mktemp)
+  jq -s '.[0] * .[1]' "$DAEMON_JSON" <(echo "$new_config") > "$tmp_file" && sudo mv "$tmp_file" "$DAEMON_JSON"
+}
 
-# Manual fallback
-echo "❌ Failed to automatically start Docker."
-echo "👉 Please try starting Docker manually:"
-echo "   sudo systemctl start docker   # for Linux"
-echo "   OR use Docker Desktop UI on Windows/Mac"
-exit 1
+# Check prerequisites
+command -v docker &>/dev/null || { echo "❌ Docker not installed."; exit 1; }
+command -v jq &>/dev/null || { echo "⚠️ Installing jq..."; sudo apt-get update && sudo apt-get install -y jq; }
+
+[[ -f $DAEMON_JSON ]] || echo '{}' | sudo tee "$DAEMON_JSON" > /dev/null
+
+backup_daemon_json
+
+# Ensure valid JSON
+jq empty "$DAEMON_JSON" || { echo "❌ Invalid JSON in daemon.json"; exit 1; }
+
+# live-restore
+jq -e '.["live-restore"] == true' "$DAEMON_JSON" &>/dev/null || merge_json_config '{"live-restore": true}'
+
+# Add DNS config if missing
+jq -e '.dns' "$DAEMON_JSON" &>/dev/null || merge_json_config '{"dns": ["8.8.8.8", "8.8.4.4"]}'
+
+# data-root path
+jq -e '.["data-root"]' "$DAEMON_JSON" &>/dev/null || merge_json_config '{"data-root": "/mnt/docker-data"}'
+
+# proxy block
+jq -e '.proxies' "$DAEMON_JSON" &>/dev/null || merge_json_config '{
+  "proxies": {
+    "http-proxy": "http://proxy.example.com:3128",
+    "https-proxy": "https://proxy.example.com:3129",
+    "no-proxy": "localhost,127.0.0.1"
+  }
+}'
+
+# Add youki and gVisor runtimes if not present
+jq -e '.runtimes' "$DAEMON_JSON" &>/dev/null || merge_json_config '{
+  "runtimes": {
+    "youki": {
+      "path": "/usr/local/bin/youki"
+    },
+    "gvisor": {
+      "runtimeType": "io.containerd.runsc.v1",
+      "options": {
+        "TypeUrl": "io.containerd.runsc.v1.options",
+        "ConfigPath": "/etc/containerd/runsc.toml"
+      }
+    }
+  }
+}'
+
+# Restart Docker
+sudo systemctl daemon-reexec
+sudo systemctl restart docker
+docker info && echo "✅ Docker restarted with enhanced config"
