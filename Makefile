@@ -41,3 +41,15 @@ reset:
 	@git reset --hard origin/main
 	@git clean -fd
 	@echo "🔁 Repository has been reset to match origin/main"
+
+
+deps:
+	@echo "📦 Verifying required system packages..."
+	@bash -c 'DEPS=(git curl gpg docker); \
+	for pkg in "${DEPS[@]}"; do \
+	  if ! command -v $$pkg &>/dev/null; then \
+	    echo "❌ Missing: $$pkg"; \
+	  else \
+	    echo "✅ Found: $$pkg"; \
+	  fi; \
+	done'

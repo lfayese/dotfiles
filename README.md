@@ -61,3 +61,5 @@ make doctor      # Full diagnostic: Docker, distro, user groups, and daemon.json
 
 make update     # Pull latest changes from GitHub
 make reset      # Reset local repo to match origin/main
+
+make deps       # Check for required system dependencies (git, curl, gpg, docker)
