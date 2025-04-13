@@ -1,64 +1,97 @@
 # 🐳 dotfiles — Docker Fixer + WSL2 Enhancer + Dev Environment Toolkit
 
-A modern, automated dotfiles and Docker daemon fixer toolkit for Linux, **Windows (via WSL2/Git Bash)**, and developer-first machines.
+A modern, automated dotfiles and Docker toolkit for Linux, **Windows (via WSL2/Git Bash)**, and developer-focused machines. Provides full setup automation, shell enhancement, Docker repair, and secure development environment setup.
 
 ---
 
 ## 🚀 Features
 
-### 🐳 Docker Daemon Enhancements
+### 🐳 Docker Enhancements
 - Auto-configures `daemon.json` with:
   - ✅ `live-restore`
   - 🌐 DNS & Proxy
-  - 📦 `youki` and `gVisor` runtimes
-  - 📁 `data-root` support
+  - 📦 Container runtimes: `youki`, `gVisor`
+  - 📁 Custom `data-root` support
 - Full WSL2 DNS detection and repair
-- One-line installer: `bootstrap_docker_repair.sh`
-- Post-install validator ensures runtime & Docker health
+- One-command setup: `bootstrap_docker_repair.sh`
+- Post-install validator ensures Docker is correctly configured
 
-### 💻 Dotfiles & Shell Configs
-- `.bashrc.append`, `.zshrc.append`, `.gitconfig.append` for clean, modular profile expansion
-- `.install.sh` + `symlink_dotfiles.sh` auto-link configs safely
+### 💻 Dotfiles & Shell Setup
+- Append files for modular config: `.bashrc.append`, `.zshrc.append`, `.gitconfig.append`
+- Safe dotfile linking via `symlink_dotfiles.sh`
+- Config support for `.ssh`, `.gnupg`, `.vscode`, `.wslconfig`
 
 ### 🛠️ Developer Environment Setup
-- `setup_docker.sh` for Docker bootstrapping
-- `setup_vscode.sh` for custom VSCode environment
-- `.vscode/settings.json` for preconfigured IDE experience
-- `.wslconfig` and `.ssh/config` + `.gnupg/gpg.conf` support
+- `setup_docker.sh`: Bootstrap Docker engine
+- `setup_vscode.sh`: Configure VSCode workspace
+- `.vscode/settings.json`: Dev-ready IDE config
 
-### ⚙️ Automation & Release Pipeline
-- `Makefile` for task automation
-- GitHub Actions CI:
-  - `/workflows/release.yml`: triggers on push/merge to `main`
-  - Auto-increments semantic version (patch/minor/major)
-  - `release-drafter.yml` prepares changelogs
+### 🧠 Shell & Tooling Boost
+- CLI utility installer: `jq`, `htop`, `fzf`, `bat`, `ripgrep`, `tmux`, `gh`, `lazygit`
+- Shell productivity: `zsh`, `powerlevel10k`, `zoxide`
+- Toolchain management: `asdf`, `gcc`, `g++`, `gdb`, `lldb`
+
+### 🐳 DevContainers
+- `.devcontainer` setup for VSCode Remote Development
+- Includes base `Dockerfile` and `devcontainer.json`
+
+### 🔐 Security Setup
+- SSH keygen and GitHub integration via `gh`
+- GPG key creation and Git signing config
+- Hardened `.ssh` and `.gnupg` settings
+
+### ⚙️ CI/CD & Release Pipeline
+- GitHub Actions:
+  - Auto-release tags
+  - Changelog generation with `generate_changelog.sh`
+  - Version bumping via PR labels (`patch`, `minor`, `major`)
+- `Makefile` with common automation targets
 
 ---
 
 ## 💻 OS Compatibility
 
-| OS            | Supported | Notes |
-|---------------|-----------|-------|
-| Linux         | ✅ Yes     | Full native support |
-| Windows (WSL2)| ✅ Yes     | Tested with Ubuntu/Debian on WSL2 |
-| Windows (Git Bash) | ✅ Partial | Non-Docker features run (e.g. symlinks, config setup) |
+| OS                  | Supported | Notes                               |
+|---------------------|-----------|-------------------------------------|
+| Linux               | ✅ Yes     | Full native support                 |
+| Windows (WSL2)      | ✅ Yes     | Tested with Ubuntu/Debian on WSL2  |
+| Windows (Git Bash)  | ✅ Partial | Symlink/config setup only          |
 
 ---
 
 ## 📦 Quickstart
 
-### 🔥 Run Everything with One Command
+### 🔧 Bootstrap Docker Setup Only
 
 ```bash
 chmod +x bootstrap_docker_repair.sh
 ./bootstrap_docker_repair.sh
 ```
 
+Includes:
+- Docker daemon fixes
+- Container runtime installs
+- WSL2 DNS fix (if applicable)
+- Docker health validation
+
+---
+
+## 🔂 Full Environment Setup
+
+To install **everything**:
+
+```bash
+chmod +x bootstrap_all.sh
+./bootstrap_all.sh
+```
+
 This will:
-- Fix Docker daemon config
-- Install runtimes
-- Fix WSL2 DNS (if applicable)
-- Run validator
+- Install CLI tools
+- Enhance shell environment
+- Install runtimes & compilers
+- Set up DevContainers
+- Configure SSH & GPG
+- Run Docker validator ✅
 
 ---
 
@@ -66,92 +99,25 @@ This will:
 
 | File                        | Purpose |
 |----------------------------|---------|
-| `fix_docker.sh`            | Auto-fixes Docker daemon config |
-| `install_runtimes.sh`      | Installs youki + gVisor runtimes |
-| `fix_wsl2_dns.sh`          | Repairs DNS issues on WSL2 |
-| `restore_docker_config.sh` | Restores previous good Docker config |
-| `validate_docker_setup.sh` | Runs post-install health check |
-| `setup_docker.sh`          | General Docker init setup |
-| `bootstrap_docker_repair.sh` | One-command to run all Docker fixes |
-| `.bashrc.append`, `.zshrc.append`, `.gitconfig.append` | Shell + Git additions |
-| `symlink_dotfiles.sh`      | Safely links dotfiles to home dir |
-| `setup_vscode.sh`          | Initializes VSCode dev environment |
-| `Makefile`                 | Automation tasks |
-| `.vscode/settings.json`    | VSCode project settings |
-| `.wslconfig`               | Optimized WSL2 config |
-| `.docker/config.json`      | Docker CLI settings |
-| `.ssh/config`              | SSH client configuration |
-| `.gnupg/gpg.conf`          | GPG key agent configuration |
-
----
-
-## 📦 Auto Versioning
-
-GitHub Actions will automatically:
-- Draft releases with changelogs
-- Bump patch/minor/major versions based on merged PR labels (`patch`, `minor`, `major`)
-
-To publish a version manually:
-
-```bash
-git tag v1.2.0
-git push origin --tags
-```
-
----
-
-## 📜 License
-
-MIT – Feel free to copy, fork, and remix responsibly. Contributions welcome!
-
----
-
-## 🔁 Auto Version Bumping (CI/CD)
-
-This project includes a GitHub Actions workflow that automatically bumps the version tag
-when new files are merged into the `main` branch. It uses the `release-drafter` GitHub app
-and semver-based tags (`v1.2.0`, `v1.3.0`, etc).
-
-🔧 To enable this:
-1. Enable the [Release Drafter GitHub App](https://github.com/apps/release-drafter)
-2. Merge any PR into `main`
-3. A draft release and version tag is generated automatically
-
-You can customize this in `.github/release-drafter.yml`.
-
-
----
-
-## 🪟 Windows Compatibility
-
-This toolkit works on **Windows 10/11** via **WSL2**:
-
-- Make sure [WSL2 is installed](https://docs.microsoft.com/en-us/windows/wsl/install)
-- Recommended distros: Ubuntu, Debian
-- Open **WSL terminal** and run:
-
-```bash
-./bootstrap_docker_repair.sh
-```
-
-All scripts are POSIX-compliant and tested in Ubuntu/Debian WSL2 environments.
-
----
-
-## 🔂 One Command to Rule Them All
-
-To run everything from start to finish:
-
-```bash
-chmod +x bootstrap_docker_repair.sh
-./bootstrap_docker_repair.sh
-```
-
-This will:
-- Fix your Docker configuration
-- Install container runtimes (youki + gVisor)
-- Fix WSL2 DNS if needed
-- Validate everything at the end ✅
+| `bootstrap_all.sh`         | Full environment setup |
+| `bootstrap_docker_repair.sh` | Docker-only fix + validation |
+| `install_cli_utilities.sh` | Installs terminal tools |
+| `install_shell_enhancements.sh` | Zsh, powerlevel10k, zoxide |
+| `install_toolchains.sh`    | asdf + language runtimes & compilers |
+| `setup_devcontainers.sh`   | Sets up VSCode DevContainer |
+| `security_setup.sh`        | SSH + GPG configuration |
+| `generate_changelog.sh`    | Auto-generates changelog |
+| `fix_docker.sh`            | Fixes Docker config |
+| `install_runtimes.sh`      | Installs container runtimes |
+| `fix_wsl2_dns.sh`          | Repairs WSL2 DNS |
+| `validate_docker_setup.sh` | Docker post-install check |
+| `setup_vscode.sh`          | IDE setup |
+| `Makefile`                 | Task automation |
+| `.vscode/settings.json`    | VSCode settings |
+| `.wslconfig`               | WSL2 optimization |
+| `.docker/config.json`      | Docker CLI config |
+| `.ssh/config`              | SSH setup |
+| `.gnupg/gpg.conf`          | GPG key setup |
 
 ---
 
@@ -163,76 +129,56 @@ This will:
 
 ---
 
-## 📝 Automated Changelog Per Tag
+## 📜 Automated Versioning & Changelog
 
-Each time a new version is tagged (e.g., `v1.2.0`), GitHub Actions and Release Drafter will:
-- Automatically generate release notes with new features, fixes, and contributors
-- Update the "Releases" tab with the latest info
+- Tags (e.g., `v1.3.0`) trigger:
+  - Draft GitHub releases
+  - Changelog generation via `release-drafter`
+- Customize changelog in `.github/release-drafter.yml`
 
-🎯 To create a new version and trigger changelog:
+**To publish:**
+
 ```bash
-git tag v1.3.0
-git push origin v1.3.0
+git tag v1.4.0
+git push origin v1.4.0
 ```
-
-Customize changelog behavior in `.github/release-drafter.yml`.
 
 ---
 
 ## 🔐 GPG Tag Signing
 
-To sign a Git tag with your GPG key:
+To GPG-sign your Git tags:
 
 ```bash
 git tag -s v1.4.0 -m "Release v1.4.0"
 git push origin v1.4.0
 ```
 
-Make sure your key is set up with Git:
+### Set up GPG:
 ```bash
 git config --global user.signingkey YOURKEYID
 git config --global commit.gpgsign true
 ```
 
-To list your available GPG keys:
+Find your key:
 ```bash
 gpg --list-secret-keys --keyid-format LONG
 ```
 
-Use GitHub's GPG guide to add your public key to your GitHub account:
-🔗 https://docs.github.com/en/authentication/managing-commit-signature-verification
-
+🔗 [Add GPG key to GitHub](https://docs.github.com/en/authentication/managing-commit-signature-verification)
 
 ---
 
-## 🧰 Extended Features in This Toolkit
+## 👤 Developer Identity
 
-### ✅ Full Bootstrap Installer
-Run everything with:
-
-```bash
-chmod +x bootstrap_all.sh
-./bootstrap_all.sh
-```
-
-This will install:
-- CLI utilities: jq, htop, fzf, bat, ripgrep, tmux, gh, lazygit
-- Shell enhancements: Zsh, powerlevel10k, zoxide
-- Toolchain managers: asdf (Node.js, Python, Ruby), compilers (gcc, g++, gdb, lldb)
-- DevContainer setup (.devcontainer/Dockerfile + devcontainer.json)
-- Security: SSH key generation, GitHub CLI integration, GPG key setup
-- Automation: GitHub Actions CI/CD, changelog generation
-
-The process ends by validating your Docker setup to ensure all configurations were successful.
+- **Name**: Laolu Fayese  
+- **Handle**: `systekLeno-gitgpg`  
+- **Email**: `166741136+lfayese@users.noreply.github.com`  
+- **GPG Key ID**: `6B9A3B918A0870C2`
 
 ---
 
-## 🔐 Identity & Signing
+## 📝 License
 
-**Developer Identity**
-- Name: Laolu Fayese
-- GPG Handle: systekLeno-gitgpg
-- Email: 166741136+lfayese@users.noreply.github.com
-- GPG Key ID: `6B9A3B918A0870C2`
-
-Note: Any tokens or credentials should be managed securely and never committed to version control.
+MIT — Fork, remix, and contribute freely.  
+Secure dev environments are better for everyone. 🎯
