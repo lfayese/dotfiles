@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "🔐 Configuring security (SSH + GPG)..."
 
-# SSH key setup
+# SSH setup
 if [ ! -f ~/.ssh/id_ed25519 ]; then
   ssh-keygen -t ed25519 -C "$USER@$(hostname)" -f ~/.ssh/id_ed25519 -N ""
   eval "$(ssh-agent -s)"
@@ -12,14 +12,19 @@ if [ ! -f ~/.ssh/id_ed25519 ]; then
   gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(hostname)-auto"
 fi
 
-# GPG key setup
-gpg --batch --gen-key <<EOF
-%no-protection
-Key-Type: default
-Subkey-Type: default
-Name-Real: Dev Toolkit
-Name-Email: devtoolkit@example.com
+# Add ~/.local/bin to PATH if zoxide installed there
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc; then
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+fi
+
+# GPG keygen (RSA fallback)
+cat <<EOF | gpg --batch --gen-key
+Key-Type: RSA
+Key-Length: 4096
+Name-Real: Laolu Fayese
+Name-Email: 166741136+lfayese@users.noreply.github.com
 Expire-Date: 1y
+%no-protection
 %commit
 EOF
 

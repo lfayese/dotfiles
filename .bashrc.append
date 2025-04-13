@@ -10,3 +10,5 @@ fi
 export GPG_TTY=$(tty)
 
 ### DOTFILES-BOOTSTRAP-END
+
+export PATH="$HOME/.local/bin:$PATH"
