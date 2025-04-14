@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 DAEMON_JSON="/etc/docker/daemon.json"
 BACKUPS=(/etc/docker/daemon.json.bak.*)
