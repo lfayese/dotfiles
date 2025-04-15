@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 echo "🔍 Post-Install Docker Validation"
 
 # Ensure Docker daemon is running
@@ -18,13 +18,60 @@ fi
 
 check() {
   echo -n "$1... "
-  eval "$2" && echo "✅" || { echo "❌"; exit 1; }
+  if eval "$2" &>/dev/null; then
+    echo "✅"
+    return 0
+  else
+    echo "❌"
+    return 1
+  fi
 }
 
-check "Docker CLI" "command -v docker"
-check "live-restore enabled" "jq -e '."live-restore" == true' /etc/docker/daemon.json"
-check "DNS config present" "jq -e '.dns' /etc/docker/daemon.json"
-check "data-root set" "jq -e '."data-root"' /etc/docker/daemon.json"
+# Check for critical failures that should stop the script
+check_critical() {
+  echo -n "$1... "
+  if eval "$2" &>/dev/null; then
+    echo "✅"
+    return 0
+  else
+    echo "❌"
+    echo "Critical error: $1 check failed"
+    exit 1
+  fi
+}
+
+DAEMON_JSON="/etc/docker/daemon.json"
+
+check_critical "Docker CLI" "command -v docker"
+
+# Check if daemon.json exists before trying to query it
+if [[ -f "$DAEMON_JSON" ]]; then
+  # Verify it's valid JSON
+  if ! jq empty "$DAEMON_JSON" &>/dev/null; then
+    echo "❌ Invalid JSON in $DAEMON_JSON"
+    echo "Running fix_docker.sh to repair the configuration..."
+    if [[ -x "$(dirname "$0")/fix_docker.sh" ]]; then
+      "$(dirname "$0")/fix_docker.sh"
+    else
+      echo "❌ Could not find fix_docker.sh script"
+      exit 1
+    fi
+  fi
+  
+  # Now check Docker settings
+  check "live-restore enabled" "jq -e '."live-restore" == true' $DAEMON_JSON"
+  check "DNS config present" "jq -e '.dns' $DAEMON_JSON"
+  check "data-root set" "jq -e '."data-root"' $DAEMON_JSON"
+else
+  echo "⚠️ Docker daemon.json not found at $DAEMON_JSON"
+  echo "Running fix_docker.sh to create the configuration..."
+  if [[ -x "$(dirname "$0")/fix_docker.sh" ]]; then
+    "$(dirname "$0")/fix_docker.sh"
+  else
+    echo "❌ Could not find fix_docker.sh script"
+    exit 1
+  fi
+fi
 
 # Check if VHDX mount is active in WSL2
 if grep -qi microsoft /proc/version; then
