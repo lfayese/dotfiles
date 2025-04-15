@@ -9,9 +9,10 @@ A modern, automated dotfiles and Docker toolkit for Linux, **Windows (via WSL2/G
 ### 🐳 Docker Enhancements
 - Auto-configures `daemon.json` with:
   - ✅ `live-restore`
-  - 🌐 DNS & Proxy
+  - 🌐 DNS configuration
   - 📦 Container runtimes: `youki`, `gVisor`
-  - 📁 Custom `data-root` support
+  - 💾 Persistent VHDX storage in WSL2
+- Smart environment detection (WSL2/Docker Desktop/Native Linux)
 - Full WSL2 DNS detection and repair
 - One-command setup: `bootstrap_docker_repair.sh`
 - Post-install validator ensures Docker is correctly configured
@@ -64,11 +65,12 @@ A modern, automated dotfiles and Docker toolkit for Linux, **Windows (via WSL2/G
 ### 🔧 Bootstrap Docker Setup Only
 
 ```bash
-chmod +x bootstrap_docker_repair.sh
+chmod +x *.sh
 ./bootstrap_docker_repair.sh
 ```
 
 Includes:
+
 - Docker daemon fixes
 - Container runtime installs
 - WSL2 DNS fix (if applicable)
@@ -81,11 +83,12 @@ Includes:
 To install **everything**:
 
 ```bash
-chmod +x bootstrap_all.sh
+chmod +x *.sh
 ./bootstrap_all.sh
 ```
 
 This will:
+
 - Install CLI tools
 - Enhance shell environment
 - Install runtimes & compilers
@@ -154,7 +157,7 @@ git tag -s v1.4.0 -m "Release v1.4.0"
 git push origin v1.4.0
 ```
 
-### Set up GPG:
+### Set up GPG
 ```bash
 git config --global user.signingkey YOURKEYID
 git config --global commit.gpgsign true

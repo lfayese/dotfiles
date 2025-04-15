@@ -7,7 +7,13 @@ echo "🌍 Installing cloud CLIs and configuring CI/CD..."
 # Install AWS CLI
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip -o awscliv2.zip
-sudo ./aws/install
+# Check for existing AWS CLI installation
+if [ -d "/usr/local/aws-cli/v2/current" ]; then
+  echo "⚠️ Found preexisting AWS CLI installation. Running install script with --update flag."
+  sudo ./aws/install --update
+else
+  sudo ./aws/install
+fi
 
 # GitHub Actions CI/CD template
 mkdir -p .github/workflows

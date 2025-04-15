@@ -37,17 +37,29 @@ jq -e '.["live-restore"] == true' "$DAEMON_JSON" &>/dev/null || merge_json_confi
 # Add DNS config if missing
 jq -e '.dns' "$DAEMON_JSON" &>/dev/null || merge_json_config '{"dns": ["8.8.8.8", "8.8.4.4"]}'
 
-# data-root path
-jq -e '.["data-root"]' "$DAEMON_JSON" &>/dev/null || merge_json_config '{"data-root": "/mnt/docker-data"}'
+# Setup Docker data storage using VHDX in WSL2 or standard directory in Linux
+DOCKER_DATA_DIR="/mnt/docker-data"
+if grep -qi microsoft /proc/version; then
+  echo "🧰 Setting up persistent Docker data storage using VHDX..."
+  # Make the script executable if it isn't already
+  chmod +x "$(dirname "${BASH_SOURCE[0]}")/create_docker_vhdx.sh"
+  "$(dirname "${BASH_SOURCE[0]}")/create_docker_vhdx.sh"
+else
+  # Standard Linux - just make sure directory exists
+  echo "📁 Creating Docker data directory at $DOCKER_DATA_DIR..."
+  sudo mkdir -p "$DOCKER_DATA_DIR"
+  sudo chown -R root:root "$DOCKER_DATA_DIR"
+fi
 
-# proxy block
-jq -e '.proxies' "$DAEMON_JSON" &>/dev/null || merge_json_config '{
-  "proxies": {
-    "http-proxy": "http://proxy.example.com:3128",
-    "https-proxy": "https://proxy.example.com:3129",
-    "no-proxy": "localhost,127.0.0.1"
-  }
-}'
+# Configure data-root path in daemon.json
+jq -e '.["data-root"]' "$DAEMON_JSON" &>/dev/null || merge_json_config "{\"data-root\": \"$DOCKER_DATA_DIR\"}"
+
+# Remove proxy configuration if present (deprecated)
+if jq -e '.proxies' "$DAEMON_JSON" &>/dev/null; then
+  echo "🧹 Removing deprecated proxy configuration..."
+  tmp_file=$(mktemp)
+  jq 'del(.proxies)' "$DAEMON_JSON" > "$tmp_file" && sudo mv "$tmp_file" "$DAEMON_JSON"
+fi
 
 # Add youki and gVisor runtimes if not present
 jq -e '.runtimes' "$DAEMON_JSON" &>/dev/null || merge_json_config '{
@@ -65,7 +77,38 @@ jq -e '.runtimes' "$DAEMON_JSON" &>/dev/null || merge_json_config '{
   }
 }'
 
-# Restart Docker
-sudo systemctl daemon-reexec
-sudo systemctl restart docker
-docker info && echo "✅ Docker restarted with enhanced config"
+# Detect WSL2 environment and Docker Desktop
+if grep -qi microsoft /proc/version; then
+  echo "🪟 WSL2 environment detected"
+  
+  # Check if Docker Desktop is being used
+  if grep -q docker-desktop /proc/self/mountinfo; then
+    echo "🐋 Docker Desktop for Windows detected"
+    
+    # For Docker Desktop, we don't restart the daemon as it's managed by Windows
+    if docker info &>/dev/null; then
+      echo "✅ Docker Desktop is running and accessible from WSL2"
+    else
+      echo "⚠️ Docker Desktop is installed but not running"
+      echo "👉 Please start Docker Desktop from Windows and ensure WSL integration is enabled for this distro"
+      exit 1
+    fi
+  else
+    # Standard Linux Docker service in WSL2
+    echo "🐧 Native Linux Docker in WSL2 detected"
+    if sudo systemctl is-active docker &>/dev/null; then
+      sudo systemctl daemon-reexec
+      sudo systemctl restart docker
+    else
+      sudo systemctl start docker
+    fi
+  fi
+else
+  # Standard Linux environment
+  echo "🐧 Native Linux environment detected"
+  sudo systemctl daemon-reexec
+  sudo systemctl restart docker
+fi
+
+# Verify Docker is working
+docker info &>/dev/null && echo "✅ Docker restarted with enhanced config" || echo "❌ Docker configuration failed"

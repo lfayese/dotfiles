@@ -1,26 +1,12 @@
-name: Release Auto Publish
-
+name: Release
 on:
   push:
     tags:
-      - 'v*'
-
+      - '*'
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Git
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-
-      - name: Auto-generate changelog and create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          generate_release_notes: true
+      - uses: actions/checkout@v3
+      - run: chmod +x generate_changelog.sh && ./generate_changelog.sh
+      - run: echo "🚀 Released!"
